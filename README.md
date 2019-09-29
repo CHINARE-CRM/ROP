@@ -1,9 +1,7 @@
 ## Chinare rest open platform
 
-简介(可用性:生产,维护者:王贵源)
-==================================
-
 Chinare rest open platform
+==================================
 
 使用springboot进行开放平台开发的签名验签机制的实现
 
