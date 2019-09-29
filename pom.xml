@@ -8,6 +8,9 @@
 	<packaging>pom</packaging>
 	<name>rop</name>
 	<description>restful open platform</description>
+	<properties>
+		<axe-version>1.0</axe-version>
+	</properties>
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
@@ -33,9 +36,6 @@
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
-	<properties>
-		<axe-version>1.0</axe-version>
-	</properties>
 	<licenses>
 		<license>
 			<name>The Apache Software License, Version 2.0</name>
