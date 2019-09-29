@@ -1,5 +1,6 @@
 package cn.com.chinarecrm.rop.config;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
 import javax.servlet.Filter;
@@ -10,7 +11,9 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
+import org.nutz.lang.Lang;
 import org.nutz.lang.Strings;
 import org.nutz.lang.util.NutMap;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -23,6 +26,7 @@ import org.springframework.web.multipart.MultipartResolver;
 
 import cn.com.chinarecrm.rop.core.signer.AppsecretFetcher;
 import cn.com.chinarecrm.rop.core.signer.DefaultMD5Fetcher;
+import cn.com.chinarecrm.rop.server.BufferResponse;
 import cn.com.chinarecrm.rop.server.NullRequestChecker;
 import cn.com.chinarecrm.rop.server.ROPServlet;
 import cn.com.chinarecrm.rop.server.ROPSignInterceptor;
@@ -71,6 +75,13 @@ public class ROPServerAutoConfiguration {
                 } else {
                     chain.doFilter(requestWrapper, response);
                 }
+                HttpServletResponse resp = (HttpServletResponse) response;
+                BufferResponse myresponse = new BufferResponse((HttpServletResponse)resp);
+                byte[] out = myresponse.getBuffer();
+                
+                System.err.println(Lang.md5(new ByteArrayInputStream(out)));
+                resp.addHeader("s", "1");
+                response.getOutputStream().write(out);
             }
 
             @Override

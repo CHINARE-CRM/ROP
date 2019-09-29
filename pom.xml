@@ -8,15 +8,22 @@
 	<packaging>pom</packaging>
 	<name>rop</name>
 	<description>restful open platform</description>
-	<properties>
-		<axe-version>1.0</axe-version>
-	</properties>
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
 		<version>2.1.8.RELEASE</version>
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
+	<repositories>
+		<repository>
+			<id>nutz</id>
+			<url>https://jfrog.nutz.cn/artifactory/jcenter</url>
+		</repository>
+		<repository>
+			<id>spring</id>
+			<url>https://jfrog.nutz.cn/artifactory/spring</url>
+		</repository>
+	</repositories>
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
@@ -36,6 +43,9 @@
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
+	<properties>
+		<axe-version>1.0</axe-version>
+	</properties>
 	<licenses>
 		<license>
 			<name>The Apache Software License, Version 2.0</name>
@@ -143,5 +153,6 @@
 		<module>rop-core</module>
 		<module>rop-server</module>
 		<module>rop-client</module>
+		<module>rop-demo</module>
 	</modules>
 </project>
