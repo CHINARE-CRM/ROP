@@ -22,7 +22,7 @@ import cn.com.chinarecrm.rop.core.signer.Signer;
 public class ROPSignInterceptor {
 
     @Autowired
-    NullRequestChecker checker;
+    RequestChecker checker;
 
     String digestName;
 
