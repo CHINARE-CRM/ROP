@@ -1,0 +1,20 @@
+*.class
+*.iml
+.idea/
+.DS_Store
+
+# Package Files #
+*.jar
+*.war
+*.ear
+
+#workspace Files
+
+node_modules/
+dist/
+.factorypath
+target/
+.settings/
+.factorypath
+.classpath
+.project
