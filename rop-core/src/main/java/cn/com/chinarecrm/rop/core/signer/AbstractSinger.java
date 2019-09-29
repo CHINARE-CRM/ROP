@@ -8,9 +8,11 @@ import java.util.List;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.Part;
 
 import org.nutz.http.Http;
+import org.nutz.http.Response;
 import org.nutz.lang.Lang;
 import org.nutz.lang.Streams;
 import org.nutz.lang.Strings;
@@ -166,6 +168,20 @@ public abstract class AbstractSinger implements Signer {
                     request.getHeader(ROPConfig.METHOD_KEY),
                     request.getHeader(ROPConfig.NONCE_KEY),
                     getDataMate(request));
+    }
+    
+    @Override
+    public String sign(HttpServletResponse response, String appSecret,String timestamp,String gateway,String nonce) {
+    	return sign(appSecret, timestamp, gateway, nonce, getDataMate(response));
+    }
+    
+    private String getDataMate(HttpServletResponse response) {
+		return null;
+	}
+
+	@Override
+    public boolean check(Response response, String appKey, String appSecret) {
+    	return false;
     }
 
 }

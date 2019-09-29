@@ -1,0 +1,28 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>cn.com.chinarecrm</groupId>
+    <artifactId>rop</artifactId>
+    <version>1.0</version>
+  </parent>
+  <artifactId>rop-demo</artifactId>
+  <name>rop-demo</name>
+  <dependencies>
+  <dependency>
+  	<groupId>cn.com.chinarecrm</groupId>
+  	<artifactId>rop-server</artifactId>
+  </dependency>
+  <dependency>
+  	<groupId>cn.com.chinarecrm</groupId>
+  	<artifactId>rop-client</artifactId>
+  </dependency>
+  <dependency>
+  		<groupId>org.springframework.boot</groupId>
+  		<artifactId>spring-boot-starter-web</artifactId>
+  	</dependency>
+  	<dependency>
+  		<groupId>org.springframework.boot</groupId>
+  		<artifactId>spring-boot-starter-actuator</artifactId>
+  	</dependency>
+  </dependencies>
+</project>
