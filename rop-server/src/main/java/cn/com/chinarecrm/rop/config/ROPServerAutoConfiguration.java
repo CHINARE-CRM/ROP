@@ -75,11 +75,12 @@ public class ROPServerAutoConfiguration {
                 } else {
                     chain.doFilter(requestWrapper, response);
                 }
-                BufferResponse myresponse = new BufferResponse((HttpServletResponse)response);
+                HttpServletResponse resp = (HttpServletResponse) response;
+                BufferResponse myresponse = new BufferResponse((HttpServletResponse)resp);
                 byte[] out = myresponse.getBuffer();
                 
                 System.err.println(Lang.md5(new ByteArrayInputStream(out)));
-                
+                resp.addHeader("s", "1");
                 response.getOutputStream().write(out);
             }
 
