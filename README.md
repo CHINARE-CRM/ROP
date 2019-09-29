@@ -1,5 +1,3 @@
-## Chinare rest open platform
-
 Chinare rest open platform
 ==================================
 
