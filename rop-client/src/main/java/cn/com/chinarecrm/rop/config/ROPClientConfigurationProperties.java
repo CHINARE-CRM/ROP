@@ -24,6 +24,8 @@ public class ROPClientConfigurationProperties {
      */
     String endpoint;
 
+    ProxyConfigurationProperties proxy;
+
     public String getAppKey() {
         return appKey;
     }
@@ -40,6 +42,10 @@ public class ROPClientConfigurationProperties {
         return endpoint;
     }
 
+    public ProxyConfigurationProperties getProxy() {
+        return proxy;
+    }
+
     public void setAppKey(String appKey) {
         this.appKey = appKey;
     }
@@ -54,6 +60,10 @@ public class ROPClientConfigurationProperties {
 
     public void setEndpoint(String endpoint) {
         this.endpoint = endpoint;
+    }
+
+    public void setProxy(ProxyConfigurationProperties proxy) {
+        this.proxy = proxy;
     }
 
 }

@@ -1,4 +1,8 @@
 rop:
+  client:    proxy:      enable: false
+      host: 127.0.0.1
+      port: 8888
+      type: http
   server:
     timeout: 100
 logging:  level:    cn.com.chinarecrm.rop: debug
