@@ -1,5 +1,6 @@
 package cn.com.chinarecrm.rop.client;
 
+import java.net.Proxy;
 import java.util.stream.Collectors;
 
 import org.nutz.http.Header;
@@ -34,12 +35,11 @@ public class ROPClient {
     }
 
     private String appKey;
-
     private String appSecret;
     private String digestName;
     private String endpoint;// 调用点
-
     Log log = Logs.get();
+    Proxy proxy;
 
     ClientSigner signer;
 
@@ -61,12 +61,21 @@ public class ROPClient {
         return endpoint;
     }
 
+    public Proxy getProxy() {
+        return proxy;
+    }
+
     public ClientSigner getSigner() {
         return signer;
     }
 
     public Response send(ROPRequest request) {
-        Response response = Sender.create(toRequest(request)).send();
+        Response response;
+        if (proxy != null) {
+            response = Sender.create(toRequest(request)).setProxy(proxy).send();
+        } else {
+            response = Sender.create(toRequest(request)).send();
+        }
         if (!response.isOK()) {
             throw Lang.makeThrow("请求失败,状态码:%d", response.getStatus());
         }
@@ -78,7 +87,12 @@ public class ROPClient {
                                          .map(item -> NutMap.NEW().addv("key", item.getKey()).addv("value", item.getValue()))
                                          .collect(Collectors.toList())));
         }
-        if (signer.check(response, appSecret, request.getGateway())) {
+        String method = request.getGateway();
+        if (request.getMethod() == METHOD.GET) {
+            String query = request.getURLEncodedParams();
+            method = Strings.isBlank(query) ? request.getGateway() : request.getGateway() + "?" + query;
+        }
+        if (signer.check(response, appSecret, method)) {
             return response;
         }
         throw Lang.makeThrow("响应签名检查失败!");
@@ -98,6 +112,10 @@ public class ROPClient {
 
     public void setEndpoint(String endpoint) {
         this.endpoint = endpoint;
+    }
+
+    public void setProxy(Proxy proxy) {
+        this.proxy = proxy;
     }
 
     public void setSigner(ClientSigner signer) {
