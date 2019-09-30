@@ -1,3 +1,4 @@
 rop:
   server:
     timeout: 100
+logging:  level:    cn.com.chinarecrm.rop: debug

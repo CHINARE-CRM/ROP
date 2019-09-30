@@ -5,7 +5,6 @@ import java.io.InputStreamReader;
 
 import org.nutz.lang.Lang;
 import org.nutz.lang.Streams;
-import org.nutz.lang.Strings;
 
 import cn.com.chinarecrm.rop.core.signer.DigestSigner;
 
@@ -21,8 +20,6 @@ public class ROPClientDigestSigner extends DigestSigner implements ClientSigner 
     protected String getDataMate(ROPRequest request) {
         if (request.isGet()) {
             String query = request.getURLEncodedParams();
-            String method = Strings.isBlank(query) ? request.getGateway() : request.getGateway() + "?" + query;
-            query = method.indexOf('?') >= 0 ? method.substring(method.indexOf('?') + 1) : "";
             return Lang.md5(query);
         }
         StringBuilder info;

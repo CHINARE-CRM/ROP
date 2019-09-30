@@ -2,6 +2,7 @@ package cn.com.chinarecrm.rop.core.signer;
 
 import java.util.Arrays;
 
+import org.nutz.json.Json;
 import org.nutz.lang.Lang;
 import org.nutz.lang.Strings;
 
@@ -25,14 +26,14 @@ public class DigestSigner extends AbstractSigner {
 
     @Override
     public String name() {
-    	return name;
+        return name;
     }
 
     @Override
     public String sign(String appSecret, String timestamp, String gateway, String nonce, String dataMate) {
         String[] temp = Lang.array(appSecret, timestamp, gateway, nonce, dataMate);
         Arrays.sort(temp);
-        log.debugf("sign with %s args %s", name(), temp);
+        log.debugf("sign with %s args %s", name(), Json.toJson(temp));
         return Lang.digest(name(), Strings.join("", temp));
     }
 }

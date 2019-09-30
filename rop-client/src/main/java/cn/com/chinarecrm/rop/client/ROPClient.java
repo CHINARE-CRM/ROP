@@ -5,12 +5,10 @@ import java.util.stream.Collectors;
 
 import org.nutz.http.Header;
 import org.nutz.http.Request;
-import org.nutz.http.Request.METHOD;
 import org.nutz.http.Response;
 import org.nutz.http.Sender;
 import org.nutz.json.Json;
 import org.nutz.lang.Lang;
-import org.nutz.lang.Strings;
 import org.nutz.lang.Times;
 import org.nutz.lang.random.R;
 import org.nutz.lang.util.NutMap;
@@ -87,12 +85,7 @@ public class ROPClient {
                                          .map(item -> NutMap.NEW().addv("key", item.getKey()).addv("value", item.getValue()))
                                          .collect(Collectors.toList())));
         }
-        String method = request.getGateway();
-        if (request.getMethod() == METHOD.GET) {
-            String query = request.getURLEncodedParams();
-            method = Strings.isBlank(query) ? request.getGateway() : request.getGateway() + "?" + query;
-        }
-        if (signer.check(response, appSecret, method)) {
+        if (signer.check(response, appSecret, request.getGateway())) {
             return response;
         }
         throw Lang.makeThrow("响应签名检查失败!");
@@ -132,23 +125,12 @@ public class ROPClient {
         String nonce = R.UU16();
         String ts = Times.now().getTime() + "";
         Header header = null;
-        if (request.getMethod() == METHOD.GET) {
-            String query = request.getURLEncodedParams();
-            String method = Strings.isBlank(query) ? request.getGateway() : request.getGateway() + "?" + query;
-            header = request.getHeader()
-                            .set(ROPConfig.APP_KEY_KEY, appKey)
-                            .set(ROPConfig.METHOD_KEY, method)
-                            .set(ROPConfig.NONCE_KEY, nonce)
-                            .set(ROPConfig.TS_KEY, ts)
-                            .set(ROPConfig.SIGN_KEY, signer.sign(appSecret, ts, method, nonce, request));
-        } else {
-            header = request.getHeader()
-                            .set(ROPConfig.APP_KEY_KEY, appKey)
-                            .set(ROPConfig.METHOD_KEY, request.getGateway())
-                            .set(ROPConfig.NONCE_KEY, nonce)
-                            .set(ROPConfig.TS_KEY, ts)
-                            .set(ROPConfig.SIGN_KEY, signer.sign(appSecret, ts, request.getGateway(), nonce, request));
-        }
+        header = request.getHeader()
+                        .set(ROPConfig.APP_KEY_KEY, appKey)
+                        .set(ROPConfig.METHOD_KEY, request.getGateway())
+                        .set(ROPConfig.NONCE_KEY, nonce)
+                        .set(ROPConfig.TS_KEY, ts)
+                        .set(ROPConfig.SIGN_KEY, signer.sign(appSecret, ts, request.getGateway(), nonce, request));
         return request.getData() == null || request.getData().length == 0 ? header.asFormContentType() : header.asJsonContentType();
     }
 
