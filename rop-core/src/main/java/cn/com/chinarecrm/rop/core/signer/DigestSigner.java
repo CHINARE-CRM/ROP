@@ -8,7 +8,7 @@ import org.nutz.lang.Strings;
 /**
  * @author 王贵源(wangguiyuan@chinarecrm.com.cn)
  */
-public class DigestSigner extends AbstractSinger {
+public class DigestSigner extends AbstractSigner {
 
     private String name;
 

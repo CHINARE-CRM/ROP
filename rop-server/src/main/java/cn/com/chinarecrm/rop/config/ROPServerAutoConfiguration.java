@@ -1,6 +1,5 @@
 package cn.com.chinarecrm.rop.config;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
 import javax.servlet.Filter;
@@ -11,9 +10,7 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
-import org.nutz.lang.Lang;
 import org.nutz.lang.Strings;
 import org.nutz.lang.util.NutMap;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -26,8 +23,9 @@ import org.springframework.web.multipart.MultipartResolver;
 
 import cn.com.chinarecrm.rop.core.signer.AppsecretFetcher;
 import cn.com.chinarecrm.rop.core.signer.DefaultMD5Fetcher;
-import cn.com.chinarecrm.rop.server.BufferResponse;
 import cn.com.chinarecrm.rop.server.NullRequestChecker;
+import cn.com.chinarecrm.rop.server.ROPExceptionHandler;
+import cn.com.chinarecrm.rop.server.ROPResponseBodyAdvice;
 import cn.com.chinarecrm.rop.server.ROPServlet;
 import cn.com.chinarecrm.rop.server.ROPSignInterceptor;
 import cn.com.chinarecrm.rop.server.RequestChecker;
@@ -66,7 +64,6 @@ public class ROPServerAutoConfiguration {
             public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
                     throws IOException, ServletException {
                 ServletRequest requestWrapper = null;
-
                 if (request instanceof HttpServletRequest) {
                     requestWrapper = new ResettableStreamHttpServletRequest((HttpServletRequest) request);
                 }
@@ -75,13 +72,6 @@ public class ROPServerAutoConfiguration {
                 } else {
                     chain.doFilter(requestWrapper, response);
                 }
-                HttpServletResponse resp = (HttpServletResponse) response;
-                BufferResponse myresponse = new BufferResponse((HttpServletResponse)resp);
-                byte[] out = myresponse.getBuffer();
-                
-                System.err.println(Lang.md5(new ByteArrayInputStream(out)));
-                resp.addHeader("s", "1");
-                response.getOutputStream().write(out);
             }
 
             @Override
@@ -98,6 +88,18 @@ public class ROPServerAutoConfiguration {
     @ConditionalOnMissingBean(RequestChecker.class)
     public RequestChecker requestChecker() {
         return new NullRequestChecker();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(ROPResponseBodyAdvice.class)
+    public ROPResponseBodyAdvice responseBodyAdvice(ROPServerConfigurationProperties properties) {
+        return new ROPResponseBodyAdvice(properties);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(ROPExceptionHandler.class)
+    public ROPExceptionHandler ropExceptionHandler() {
+        return new ROPExceptionHandler();
     }
 
     @Bean

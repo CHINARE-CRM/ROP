@@ -1,7 +1,6 @@
 package cn.com.chinarecrm.rop.core.signer;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import org.nutz.http.Response;
 
@@ -16,19 +15,22 @@ public interface Signer {
      *            请求
      * @param fetcher
      *            密钥获取器
-     * @return 是否检查通过 
+     * @return 是否检查通过
      */
     public boolean check(HttpServletRequest request, AppsecretFetcher fetcher);
-    
+
     /**
-     *  -对 response 进行签名
-     * @param response 响应
-     * @param fetcher  密钥获取器
-     * @return 签名值
+     * 响应检查
+     * 
+     * @param response
+     *            响应
+     * @param appSecret
+     *            appSecret
+     * @param gateway
+     *            请求接口
+     * @return 是否通过
      */
-    public String sign(HttpServletResponse response, String appSecret,String timestamp,String gateway,String nonce) ;
-    
-    public boolean check(Response response,String appKey,String appSecret);
+    public boolean check(Response response, String appSecret, String gateway);
 
     /**
      * 名称

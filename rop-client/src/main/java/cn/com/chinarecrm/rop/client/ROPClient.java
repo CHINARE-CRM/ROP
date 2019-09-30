@@ -5,6 +5,7 @@ import org.nutz.http.Request;
 import org.nutz.http.Request.METHOD;
 import org.nutz.http.Response;
 import org.nutz.http.Sender;
+import org.nutz.lang.Lang;
 import org.nutz.lang.Strings;
 import org.nutz.lang.Times;
 import org.nutz.lang.random.R;
@@ -17,22 +18,26 @@ import cn.com.chinarecrm.rop.ROPConfig;
  * @author 王贵源(wangguiyuan@chinarecrm.com.cn)
  */
 public class ROPClient {
+
     public static ROPClient create(String appKey, String appSecret, String endpoint, String digestName) {
         ROPClient client = new ROPClient();
         client.setAppKey(appKey);
         client.setAppSecret(appSecret);
         client.setEndpoint(endpoint);
         client.setDigestName(digestName);
+        client.setSigner(new ROPClientDigestSigner(digestName));
         return client;
     }
 
     private String appKey;
+
     private String appSecret;
     private String digestName;
-
     private String endpoint;// 调用点
 
     Log log = Logs.get();
+
+    ClientSigner signer;
 
     private ROPClient() {}
 
@@ -52,8 +57,19 @@ public class ROPClient {
         return endpoint;
     }
 
+    public ClientSigner getSigner() {
+        return signer;
+    }
+
     public Response send(ROPRequest request) {
-        return Sender.create(toRequest(request)).send();
+        Response response = Sender.create(toRequest(request)).send();
+        if (!response.isOK()) {
+            throw Lang.makeThrow("请求失败,状态码:%d", response.getStatus());
+        }
+        if (signer.check(response, appSecret, request.getGateway())) {
+            return response;
+        }
+        throw Lang.makeThrow("响应签名检查失败!");
     }
 
     public void setAppKey(String appKey) {
@@ -70,6 +86,10 @@ public class ROPClient {
 
     public void setEndpoint(String endpoint) {
         this.endpoint = endpoint;
+    }
+
+    public void setSigner(ClientSigner signer) {
+        this.signer = signer;
     }
 
     /**
@@ -90,15 +110,14 @@ public class ROPClient {
                             .set(ROPConfig.METHOD_KEY, method)
                             .set(ROPConfig.NONCE_KEY, nonce)
                             .set(ROPConfig.TS_KEY, ts)
-                            .set(ROPConfig.SIGN_KEY, new ROPClientDigestSigner(digestName).sign(appSecret, ts, method, nonce, request));
+                            .set(ROPConfig.SIGN_KEY, signer.sign(appSecret, ts, method, nonce, request));
         } else {
             header = request.getHeader()
                             .set(ROPConfig.APP_KEY_KEY, appKey)
                             .set(ROPConfig.METHOD_KEY, request.getGateway())
                             .set(ROPConfig.NONCE_KEY, nonce)
                             .set(ROPConfig.TS_KEY, ts)
-                            .set(ROPConfig.SIGN_KEY,
-                                 new ROPClientDigestSigner(digestName).sign(appSecret, ts, request.getGateway(), nonce, request));
+                            .set(ROPConfig.SIGN_KEY, signer.sign(appSecret, ts, request.getGateway(), nonce, request));
         }
         return request.getData() == null || request.getData().length == 0 ? header.asFormContentType() : header.asJsonContentType();
     }

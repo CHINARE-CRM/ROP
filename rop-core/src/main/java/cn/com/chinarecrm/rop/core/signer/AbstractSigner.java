@@ -8,7 +8,6 @@ import java.util.List;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.Part;
 
 import org.nutz.http.Http;
@@ -18,15 +17,13 @@ import org.nutz.lang.Streams;
 import org.nutz.lang.Strings;
 import org.nutz.log.Log;
 import org.nutz.log.Logs;
-import org.nutz.mvc.upload.UploadingContext;
 
 import cn.com.chinarecrm.rop.ROPConfig;
 
 /**
  * @author 王贵源(wangguiyuan@chinarecrm.com.cn)
  */
-public abstract class AbstractSinger implements Signer {
-    UploadingContext context = new UploadingContext(System.getProperty("java.io.tmpdir"));
+public abstract class AbstractSigner implements Signer {
 
     Log log = Logs.get();
 
@@ -42,6 +39,14 @@ public abstract class AbstractSinger implements Signer {
         String sign = request.getHeader(ROPConfig.SIGN_KEY);
         log.debugf("Expected sign is %s", sign);
         return Strings.equalsIgnoreCase(sign(request, fetcher), sign);
+    }
+
+    @Override
+    public boolean check(Response response, String appSecret, String gateway) {
+        String nonce = response.getHeader().get(ROPConfig.NONCE_KEY);
+        String timestamp = response.getHeader().get(ROPConfig.TS_KEY);
+        String sign = response.getHeader().get(ROPConfig.SIGN_KEY);
+        return Strings.equals(sign(appSecret, timestamp, gateway, nonce, Lang.md5(response.getContent())), sign);
     }
 
     public String contentType(HttpServletRequest request) {
@@ -168,20 +173,6 @@ public abstract class AbstractSinger implements Signer {
                     request.getHeader(ROPConfig.METHOD_KEY),
                     request.getHeader(ROPConfig.NONCE_KEY),
                     getDataMate(request));
-    }
-    
-    @Override
-    public String sign(HttpServletResponse response, String appSecret,String timestamp,String gateway,String nonce) {
-    	return sign(appSecret, timestamp, gateway, nonce, getDataMate(response));
-    }
-    
-    private String getDataMate(HttpServletResponse response) {
-		return null;
-	}
-
-	@Override
-    public boolean check(Response response, String appKey, String appSecret) {
-    	return false;
     }
 
 }
