@@ -1,14 +1,18 @@
 package cn.com.chinarecrm.rop.client;
 
+import java.util.stream.Collectors;
+
 import org.nutz.http.Header;
 import org.nutz.http.Request;
 import org.nutz.http.Request.METHOD;
 import org.nutz.http.Response;
 import org.nutz.http.Sender;
+import org.nutz.json.Json;
 import org.nutz.lang.Lang;
 import org.nutz.lang.Strings;
 import org.nutz.lang.Times;
 import org.nutz.lang.random.R;
+import org.nutz.lang.util.NutMap;
 import org.nutz.log.Log;
 import org.nutz.log.Logs;
 
@@ -65,6 +69,14 @@ public class ROPClient {
         Response response = Sender.create(toRequest(request)).send();
         if (!response.isOK()) {
             throw Lang.makeThrow("请求失败,状态码:%d", response.getStatus());
+        }
+        if (log.isDebugEnabled()) {
+            Header header = response.getHeader();
+            log.debugf("response headers -> %s",
+                       Json.toJson(header.getAll()
+                                         .stream()
+                                         .map(item -> NutMap.NEW().addv("key", item.getKey()).addv("value", item.getValue()))
+                                         .collect(Collectors.toList())));
         }
         if (signer.check(response, appSecret, request.getGateway())) {
             return response;
