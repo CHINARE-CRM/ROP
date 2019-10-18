@@ -8,6 +8,7 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import cn.com.chinarecrm.rop.ROPConfig;
 import cn.com.chinarecrm.rop.core.signer.AppsecretFetcher;
 import cn.com.chinarecrm.rop.core.signer.DigestSigner;
 import cn.com.chinarecrm.rop.core.signer.Signer;
@@ -21,35 +22,42 @@ import cn.com.chinarecrm.rop.core.signer.Signer;
 @Aspect
 public class ROPSignInterceptor {
 
-    @Autowired
-    RequestChecker checker;
+	@Autowired
+	RequestChecker checker;
 
-    String digestName;
+	String digestName;
 
-    @Autowired
-    AppsecretFetcher fetcher;
+	@Autowired
+	AppsecretFetcher fetcher;
 
-    @Autowired
-    HttpServletRequest request;
+	@Autowired
+	HttpServletRequest request;
 
-    @Autowired
-    HttpServletResponse response;
+	@Autowired
+	HttpServletResponse response;
 
-    /**
-     *
-     */
-    public ROPSignInterceptor(String digestName) {
-        this.digestName = digestName;
-    }
+	CacheMap<String, Boolean> cacheMap;
+	
+	boolean check;
 
-    @Around("@within(cn.com.chinarecrm.rop.server.ROP)|| @annotation(cn.com.chinarecrm.rop.server.ROP)")
-    public Object filter(ProceedingJoinPoint point) throws Throwable {
-        Signer signer = new DigestSigner(digestName);
-        if (checker.check(request) && signer.check(request, fetcher)) {
-            return point.proceed();
-        } else {
-            throw new ROPException("checkSign failed");
-        }
-    }
+	public ROPSignInterceptor(String digestName, long timeout, boolean check) {
+		this.digestName = digestName;
+		this.check = check;
+		this.cacheMap = new CacheMap<>(timeout * 1000);
+	}
+
+	@Around("@within(com.chinare.rop.server.ROP)|| @annotation(com.chinare.rop.server.ROP)")
+	public Object filter(ProceedingJoinPoint point) throws Throwable {
+		String nonce = request.getHeader(ROPConfig.NONCE_KEY);
+		if ( check && Boolean.TRUE.equals(cacheMap.get(nonce))) {
+			throw new ROPException("replay check failed");
+		}
+		Signer signer = new DigestSigner(digestName);
+		if (checker.check(request) && signer.check(request, fetcher)) {
+			return point.proceed();
+		} else {
+			throw new ROPException("checkSign failed");
+		}
+	}
 
 }

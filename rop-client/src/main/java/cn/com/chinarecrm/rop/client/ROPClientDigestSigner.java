@@ -3,6 +3,7 @@ package cn.com.chinarecrm.rop.client;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
+import org.nutz.http.Http;
 import org.nutz.lang.Lang;
 import org.nutz.lang.Streams;
 
@@ -19,8 +20,8 @@ public class ROPClientDigestSigner extends DigestSigner implements ClientSigner 
 
     protected String getDataMate(ROPRequest request) {
         if (request.isGet()) {
-            String query = request.getURLEncodedParams();
-            return Lang.md5(query);
+            String query = request.getUrlEncodedParams();
+            return Lang.md5(Http.encode(query, request.getEnc()));
         }
         StringBuilder info;
         try {

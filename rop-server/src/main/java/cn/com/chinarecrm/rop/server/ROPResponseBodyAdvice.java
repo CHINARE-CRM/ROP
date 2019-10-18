@@ -10,7 +10,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.nutz.lang.Lang;
 import org.nutz.lang.Times;
-import org.nutz.lang.random.R;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.MethodParameter;
@@ -86,9 +85,8 @@ public class ROPResponseBodyAdvice implements ResponseBodyAdvice<Object> {
         String key = request.getHeader(ROPConfig.APP_KEY_KEY);
         String gateway = request.getHeader(ROPConfig.METHOD_KEY);
         String timestamp = Times.now().getTime() + "";
-        String nonce = R.UU16();
+        String nonce =  request.getHeader(ROPConfig.NONCE_KEY);
         String sign = new DigestSigner(digestName).sign(appsecretFetcher.fetch(key), timestamp, gateway, nonce, bodyMd5);
-        response.setHeader(ROPConfig.NONCE_KEY, nonce);
         response.setHeader(ROPConfig.TS_KEY, timestamp);
         response.setHeader(ROPConfig.SIGN_KEY, sign);
         return body;

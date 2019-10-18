@@ -16,12 +16,9 @@ import org.nutz.http.Header;
 import org.nutz.http.Http;
 import org.nutz.http.Request.METHOD;
 import org.nutz.json.Json;
-import org.nutz.lang.ContinueLoop;
-import org.nutz.lang.Each;
 import org.nutz.lang.Encoding;
 import org.nutz.lang.ExitLoop;
 import org.nutz.lang.Lang;
-import org.nutz.lang.LoopException;
 import org.nutz.lang.util.NutMap;
 
 import cn.com.chinarecrm.rop.core.signer.SignerHelper;
@@ -82,23 +79,20 @@ public class ROPRequest {
         Collections.sort(keys);
         for (final String key : keys) {
             Object val = params.get(key);
-            if (val == null)
+            if (val == null) {
                 val = "";
-            Lang.each(val, new Each<Object>() {
-                @Override
-                public void invoke(int index, Object ele, int length)
-                        throws ExitLoop, ContinueLoop, LoopException {
-                    if (ele instanceof File) {
-                        sb.append(Http.encode(key, enc))
-                          .append('=')
-                          .append(Http.encode(Lang.md5((File) ele), enc))
-                          .append('&');
-                    } else {
-                        sb.append(Http.encode(key, enc))
-                          .append('=')
-                          .append(Http.encode(ele, enc))
-                          .append('&');
-                    }
+            }
+            Lang.each(val, (int index, Object ele, int length) -> {
+                if (ele instanceof File) {
+                    sb.append(Http.encode(key, enc))
+                      .append('=')
+                      .append(Http.encode(Lang.md5((File) ele), enc))
+                      .append('&');
+                } else {
+                    sb.append(Http.encode(key, enc))
+                      .append('=')
+                      .append(Http.encode(ele, enc))
+                      .append('&');
                 }
             });
         }
@@ -106,8 +100,9 @@ public class ROPRequest {
 
     public Cookie getCookie() {
         String s = header.get("Cookie");
-        if (null == s)
+        if (null == s) {
             return new Cookie();
+        }
         return new Cookie(s);
     }
 
@@ -134,11 +129,12 @@ public class ROPRequest {
         if (inputStream != null) {
             return inputStream;
         } else {
-            if (header.get("Content-Type") == null)
+            if (header.get("Content-Type") == null) {
                 header.asFormContentType(enc);
+            }
             if (null == data) {
                 try {
-                    return new ByteArrayInputStream(getURLEncodedParams().getBytes(enc));
+                    return new ByteArrayInputStream(getUrlEncodedParams().getBytes(enc));
                 }
                 catch (UnsupportedEncodingException e) {
                     throw Lang.wrapThrow(e);
@@ -156,7 +152,7 @@ public class ROPRequest {
         return params;
     }
 
-    public String getURLEncodedParams() {
+    public String getUrlEncodedParams() {
         // 此处不影响发送的数据,只影响签名,需要按照rop的规则进行签名串的获取即可
         final StringBuilder sb = new StringBuilder();
         if (isFileUpload()) {// 文件上传的签名流
@@ -164,8 +160,9 @@ public class ROPRequest {
         } else if (params != null) {
             return SignerHelper.mapAsUrlParams(params, enc);
         }
-        if (sb.length() > 0)
+        if (sb.length() > 0) {
             sb.setLength(sb.length() - 1);
+        }
         return sb.toString();
     }
 
@@ -179,22 +176,19 @@ public class ROPRequest {
     }
 
     public boolean isFileUpload() {
-        final NutMap t = NutMap.NEW().addv("target", false);
+        String temp = "target";
+        final NutMap t = NutMap.NEW().addv(temp, false);
         if ((isPost() || isPut()) && getParams() != null) {
             for (Object val : getParams().values()) {
-                Lang.each(val, new Each<Object>() {
-
-                    @Override
-                    public void invoke(int index, Object ele, int length) throws ExitLoop, ContinueLoop, LoopException {
-                        if (ele instanceof File) {
-                            t.put("target", true);
-                            throw new ExitLoop();
-                        }
+                Lang.each(val, (int index, Object ele, int length) -> {
+                    if (ele instanceof File) {
+                        t.put(temp, true);
+                        throw new ExitLoop();
                     }
                 });
             }
         }
-        return t.getBoolean("target");
+        return t.getBoolean(temp);
     }
 
     public boolean isGet() {
@@ -225,8 +219,9 @@ public class ROPRequest {
     }
 
     public ROPRequest setEnc(String reqEnc) {
-        if (reqEnc != null)
+        if (reqEnc != null) {
             this.enc = reqEnc;
+        }
         return this;
     }
 
@@ -236,8 +231,9 @@ public class ROPRequest {
     }
 
     public ROPRequest setHeader(Header header) {
-        if (header == null)
+        if (header == null) {
             header = Header.create();
+        }
         this.header = header;
         return this;
     }

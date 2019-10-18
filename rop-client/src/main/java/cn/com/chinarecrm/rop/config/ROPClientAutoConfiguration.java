@@ -22,7 +22,7 @@ public class ROPClientAutoConfiguration {
                                             configProperties.getAppSecret(),
                                             configProperties.getEndpoint(),
                                             configProperties.getDigestName());
-        if (configProperties.getProxy().isEnable()) {
+        if (configProperties.getProxy() != null && configProperties.getProxy().isEnable()) {
             Proxy proxy = new Proxy(configProperties.getProxy().getType(),
                                     new InetSocketAddress(configProperties.getProxy().getHost(), configProperties.getProxy().getPort()));
             client.setProxy(proxy);
